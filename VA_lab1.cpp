@@ -23,10 +23,10 @@ int main()
 	double number;
 	string str;
 
-	vector <vector <double> > matrix_A;
-	vector <double> matrix_B;
+	vector <vector <double> > matrix;
+	vector <double> x;
 
-	//Заполнение матрицы системы уравнений
+	//заполнение матрицы системы уравнений
 	while (str_start != str_end)
 	{
 		str_start = f.tellg();
@@ -37,14 +37,14 @@ int main()
 
 		if (str_start != str_end)
 		{
-			matrix_A.push_back(vector <double>());
+			matrix.push_back(vector <double>());
 			k++;
 		}
 
 		while (f.tellg() < str_end)
 		{
 			f >> number;
-			matrix_A[k].push_back(number);
+			matrix[k].push_back(number);
 		}
 
 		getline(f, str);
@@ -52,28 +52,26 @@ int main()
 
 	k = 0; 
 
-	//Заполнение столбца свободных членов
+	//заполнение столбца свободных членов
 	while (!f.eof())
 	{
 		f >> number;
-		matrix_A[k++].push_back(number);
+		matrix[k++].push_back(number);
 	}
 
 	f.close();
 
+	//проверка числа строк и столбцов
 	bool end = false;
 
 	for (int i = 1; i < k && !end; i++) 
 	{
-		if (matrix_A[0].size() != matrix_A[i].size())
+		if (matrix[0].size() != matrix[i].size())
 			end = true;
 	}
 
-	if (k + 1 != matrix_A[0].size())
+	if (k + 1 != matrix[0].size())
 		end = true;
-
-	/*if (k != matrix_B.size() || k != matrix_A[0].size())
-		end = true;*/
 
 	if (end) 
 	{
@@ -81,34 +79,50 @@ int main()
 		return -1;
 	}
 
-	for (int t = 0; t < k; t++)
+	//приведение к треугольной матрице с использованием выбора главного элемента
+	for (int t = 0; t < k - 1; t++)
 	{
-		double max = fabs(matrix_A[t][t]);
+		double max = fabs(matrix[t][t]);
 		int num = t;
 
+		//поиск главного элемента в столбце (наибольшего по модулю)
 		for (int i = t + 1; i < k; i++)
 		{
-			if (fabs(matrix_A[i][t]) > max)
+			if (fabs(matrix[i][t]) > max)
 			{
-				max = fabs(matrix_A[i][t]);
+				max = fabs(matrix[i][t]);
 				num = i;
 			}
 		}
 
-		matrix_A[t].swap(matrix_A[num]);
+		matrix[t].swap(matrix[num]); //перестановка столбцов
 
-		//int 
-		//matrix_B[t].swap(matrix_B[num]);
-
+		//прямой ход
 		for (int i = t + 1; i < k; i++)
 		{
-			double coef = matrix_A[i][t] / matrix_A[t][t];
+			double coef = matrix[i][t] / matrix[t][t];
 
 			for (int j = t; j <= k; j++)
 			{
-				matrix_A[i][j] = matrix_A[i][j] - matrix_A[t][j] * coef;
+				matrix[i][j] = matrix[i][j] - matrix[t][j] * coef;
+
 			}
 		}
+	}
+
+	x.resize(k);
+
+	//обратный ход
+	for (int i = k - 1; i >= 0; i--) 
+	{
+		double sum = 0;
+
+		for (int j = k - 1; j > i; j--)
+		{
+			sum += matrix[i][j] * x[j];
+		}
+
+		x[i] = (matrix[i][k] - sum) / matrix[i][i];
 	}
 
 	return 0;
