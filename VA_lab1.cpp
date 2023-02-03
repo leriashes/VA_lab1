@@ -83,14 +83,14 @@ int main()
 
 	for (int t = 0; t < k; t++)
 	{
-		double max = matrix_A[t][t];
+		double max = fabs(matrix_A[t][t]);
 		int num = t;
 
 		for (int i = t + 1; i < k; i++)
 		{
-			if (matrix_A[i][t] > max)
+			if (fabs(matrix_A[i][t]) > max)
 			{
-				max = matrix_A[i][t];
+				max = fabs(matrix_A[i][t]);
 				num = i;
 			}
 		}
@@ -104,7 +104,7 @@ int main()
 		{
 			double coef = matrix_A[i][t] / matrix_A[t][t];
 
-			for (int j = t; j < k; j++)
+			for (int j = t; j <= k; j++)
 			{
 				matrix_A[i][j] = matrix_A[i][j] - matrix_A[t][j] * coef;
 			}
