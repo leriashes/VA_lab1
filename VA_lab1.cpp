@@ -19,7 +19,7 @@ int main()
 		return -1;
 	}
 
-	int i = -1, str_start = 0, str_end = 1;
+	int k = -1, str_start = 0, str_end = 1;
 	double number;
 	string str;
 
@@ -38,26 +38,78 @@ int main()
 		if (str_start != str_end)
 		{
 			matrix_A.push_back(vector <double>());
-			i++;
+			k++;
 		}
 
 		while (f.tellg() < str_end)
 		{
 			f >> number;
-			matrix_A[i].push_back(number);
+			matrix_A[k].push_back(number);
 		}
 
 		getline(f, str);
 	}
 
+	k = 0; 
+
 	//Заполнение столбца свободных членов
 	while (!f.eof())
 	{
 		f >> number;
-		matrix_B.push_back(number);
+		matrix_A[k++].push_back(number);
 	}
 
 	f.close();
 
+	bool end = false;
 
+	for (int i = 1; i < k && !end; i++) 
+	{
+		if (matrix_A[0].size() != matrix_A[i].size())
+			end = true;
+	}
+
+	if (k + 1 != matrix_A[0].size())
+		end = true;
+
+	/*if (k != matrix_B.size() || k != matrix_A[0].size())
+		end = true;*/
+
+	if (end) 
+	{
+		cout << "Всё плохо!";
+		return -1;
+	}
+
+	for (int t = 0; t < k; t++)
+	{
+		double max = matrix_A[t][t];
+		int num = t;
+
+		for (int i = t + 1; i < k; i++)
+		{
+			if (matrix_A[i][t] > max)
+			{
+				max = matrix_A[i][t];
+				num = i;
+			}
+		}
+
+		matrix_A[t].swap(matrix_A[num]);
+
+		//int 
+		//matrix_B[t].swap(matrix_B[num]);
+
+		for (int i = t + 1; i < k; i++)
+		{
+			double coef = matrix_A[i][t] / matrix_A[t][t];
+
+			for (int j = t; j < k; j++)
+			{
+				matrix_A[i][j] = matrix_A[i][j] - matrix_A[t][j] * coef;
+			}
+		}
+	}
+
+	return 0;
 }
