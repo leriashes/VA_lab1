@@ -19,12 +19,13 @@ int main()
 		return -1;
 	}
 
-	int k = -1, str_start = 0, str_end = 1;
+	int k = -1, str_start = 0, str_end = 1, p = 0;
 	double number;
 	string str;
 
 	vector <vector <double> > matrix;
-	vector <double> x;
+	vector <vector <double> > matrix_copy;
+	vector <double> x, r;
 
 	//заполнение матрицы системы уравнений
 	while (str_start != str_end)
@@ -61,6 +62,8 @@ int main()
 
 	f.close();
 
+	matrix_copy = matrix;
+
 	//проверка числа строк и столбцов
 	bool end = false;
 
@@ -95,7 +98,11 @@ int main()
 			}
 		}
 
-		matrix[t].swap(matrix[num]); //перестановка столбцов
+		if (t != num)
+		{
+			matrix[t].swap(matrix[num]); //перестановка строк
+			p++;
+		}
 
 		//прямой ход
 		for (int i = t + 1; i < k; i++)
@@ -110,7 +117,15 @@ int main()
 		}
 	}
 
+	double det = pow(-1, p);
+
+	for (int i = 0; i < k; i++)
+	{
+		det *= matrix[i][i];
+	}
+
 	x.resize(k);
+	r.resize(k);
 
 	//обратный ход
 	for (int i = k - 1; i >= 0; i--) 
@@ -123,6 +138,26 @@ int main()
 		}
 
 		x[i] = (matrix[i][k] - sum) / matrix[i][i];
+	}
+
+	for (int i = 0; i < k; i++)
+	{
+		r[i] = matrix[i][k];
+
+		for (int j = 0; j < k; j++)
+		{
+			r[i] -= matrix[i][j] * x[j];
+		}
+	}
+
+	for (int i = 0; i < k; i++)
+	{
+		r[i] = matrix_copy[i][k];
+
+		for (int j = 0; j < k; j++)
+		{
+			r[i] -= matrix_copy[i][j] * x[j];
+		}
 	}
 
 	return 0;
