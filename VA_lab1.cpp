@@ -26,6 +26,7 @@ int main()
 
 	vector <vector <double> > matrix;
 	vector <vector <double> > matrix_copy;
+	vector <vector <double> > matrix_reversed;
 	vector <double> x, r;
 
 	//заполнение матрицы системы уравнений
@@ -87,6 +88,7 @@ int main()
 	}
 
 	matrix_copy = matrix;
+	matrix_reversed = matrix;
 
 	cout << "Матрица A (матрица системы)" << endl;
 	for (int i = 0; i < k; i++)
@@ -139,13 +141,31 @@ int main()
 			{
 				matrix[i][j] = matrix[i][j] - matrix[t][j] * coef;
 			}
+
+			matrix[i][t] = coef;
 		}
 	}
 
-	cout << "Матрица A (матрица системы)" << endl;
+	cout << "Матрица" << endl;
 	for (int i = 0; i < k; i++)
 	{
 		for (int j = 0; j < k; j++)
+		{
+			cout << matrix[i][j] << " ";
+		}
+
+		cout << endl;
+	}
+
+	cout << "\nМатрица A (матрица системы)" << endl;
+	for (int i = 0; i < k; i++)
+	{
+		for (int j = 0; j < i; j++)
+		{
+			cout << "0 ";
+		}
+
+		for (int j = i; j < k; j++)
 		{
 			cout << matrix[i][j] << " ";
 		}
@@ -234,6 +254,49 @@ int main()
 		cout << r[i] << " " << endl;
 	}
 	cout << endl;
+
+	//обратная матрица
+	for (int t = 0; t < k; t++)
+	{
+		vector <double> e;
+		e.resize(k, 0);
+		e[t] = 1;
+
+		for (int i = t + 1; i < k; i++)
+		{
+			for (int j = 0; j < i; j++)
+			{
+				e[i] -= matrix[i][j] * e[j];
+			}
+		}
+
+		int a, b;
+		//обратный ход
+		for (int i = k - 1; i >= 0; i--)
+		{
+			double sum = 0;
+
+			for (int j = k - 1; j > i; j--)
+			{
+				sum += matrix[i][j] * matrix_reversed[j][t];
+			}
+			a = (e[i] - sum) / matrix[i][i];
+			matrix_reversed[i][t] = (e[i] - sum) / matrix[i][i];
+			
+		}
+	}
+
+
+	cout << "\nОбратная матрица" << endl;
+	for (int i = 0; i < k; i++)
+	{
+		for (int j = 0; j < k; j++)
+		{
+			cout << matrix_reversed[i][j] << " ";
+		}
+
+		cout << endl;
+	}
 
 	return 0;
 }
