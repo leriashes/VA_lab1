@@ -15,20 +15,21 @@ int main()
 	//файл для чтения не открылся
 	if (!f)
 	{
-		cout << " Не удалось открыть файл 'input.dat'";
+		cout << " Не удалось открыть файл 'input.dat'" << endl;
 		return -1;
 	}
 
 	int k = -1, str_start = 0, str_end = 1, p = 0;
 	double number;
 	string str;
+	bool end = false;
 
 	vector <vector <double> > matrix;
 	vector <vector <double> > matrix_copy;
 	vector <double> x, r;
 
 	//заполнение матрицы системы уравнений
-	while (str_start != str_end)
+	while (str_start != str_end && !end)
 	{
 		str_start = f.tellg();
 		getline(f, str);
@@ -49,40 +50,64 @@ int main()
 		}
 
 		getline(f, str);
+
+		if (k > matrix[0].size()) {
+			end = true;
+		}
 	}
 
-	k = 0; 
-
-	//заполнение столбца свободных членов
-	while (!f.eof())
+	if (!end)
 	{
-		f >> number;
-		matrix[k++].push_back(number);
+		k = 0;
+
+		//заполнение столбца свободных членов
+		while (!f.eof())
+		{
+			f >> number;
+			matrix[k++].push_back(number);
+		}
+
+		//проверка числа строк и столбцов
+		for (int i = 1; i < k && !end; i++)
+		{
+			if (matrix[0].size() != matrix[i].size())
+				end = true;
+		}
+
+		if (k + 1 != matrix[0].size())
+			end = true;
 	}
 
 	f.close();
 
-	matrix_copy = matrix;
-
-	//проверка числа строк и столбцов
-	bool end = false;
-
-	for (int i = 1; i < k && !end; i++) 
-	{
-		if (matrix[0].size() != matrix[i].size())
-			end = true;
-	}
-
-	if (k + 1 != matrix[0].size())
-		end = true;
-
 	if (end) 
 	{
-		cout << "Всё плохо!";
+		cout << "Неверный формат данных!" << endl;
 		return -1;
 	}
 
-	//приведение к треугольной матрице с использованием выбора главного элемента
+	matrix_copy = matrix;
+
+	cout << "Матрица A (матрица системы)" << endl;
+	for (int i = 0; i < k; i++)
+	{
+		for (int j = 0; j < k; j++)
+		{
+			cout << matrix[i][j] << " ";
+		}
+
+		cout << endl;
+	}
+
+	cout << "\nВектор B" << endl;
+	for (int i = 0; i < k; i++)
+	{
+		cout << matrix[i][k] << " " << endl;
+	}
+	cout << endl;
+
+
+	//приведение матрицы к треугольному виду с использованием выбора главного элемента
 	for (int t = 0; t < k - 1; t++)
 	{
 		double max = fabs(matrix[t][t]);
@@ -98,9 +123,10 @@ int main()
 			}
 		}
 
+		//перестановка строк
 		if (t != num)
 		{
-			matrix[t].swap(matrix[num]); //перестановка строк
+			matrix[t].swap(matrix[num]); 
 			p++;
 		}
 
@@ -112,16 +138,44 @@ int main()
 			for (int j = t; j <= k; j++)
 			{
 				matrix[i][j] = matrix[i][j] - matrix[t][j] * coef;
-
 			}
 		}
 	}
 
+	cout << "Матрица A (матрица системы)" << endl;
+	for (int i = 0; i < k; i++)
+	{
+		for (int j = 0; j < k; j++)
+		{
+			cout << matrix[i][j] << " ";
+		}
+
+		cout << endl;
+	}
+
+	cout << "\nВектор B" << endl;
+	for (int i = 0; i < k; i++)
+	{
+		cout << matrix[i][k] << " " << endl;
+	}
+	cout << endl;
+
+	//вычисление определителя
 	double det = pow(-1, p);
 
 	for (int i = 0; i < k; i++)
 	{
 		det *= matrix[i][i];
+	}
+
+	if (det == 0)
+	{
+		cout << "Матрица вырождена! det A = 0" << endl;
+		return 0;
+	}
+	else
+	{
+		cout << "det A = " << det << endl;
 	}
 
 	x.resize(k);
@@ -140,6 +194,13 @@ int main()
 		x[i] = (matrix[i][k] - sum) / matrix[i][i];
 	}
 
+	cout << "\nВектор X" << endl;
+	for (int i = 0; i < k; i++)
+	{
+		cout << x[i] << " " << endl;
+	}
+	cout << endl;
+
 	for (int i = 0; i < k; i++)
 	{
 		r[i] = matrix[i][k];
@@ -150,6 +211,13 @@ int main()
 		}
 	}
 
+	cout << "\nНевязки 1" << endl;
+	for (int i = 0; i < k; i++)
+	{
+		cout << r[i] << " " << endl;
+	}
+	cout << endl;
+
 	for (int i = 0; i < k; i++)
 	{
 		r[i] = matrix_copy[i][k];
@@ -159,6 +227,13 @@ int main()
 			r[i] -= matrix_copy[i][j] * x[j];
 		}
 	}
+
+	cout << "\nНевязки 2" << endl;
+	for (int i = 0; i < k; i++)
+	{
+		cout << r[i] << " " << endl;
+	}
+	cout << endl;
 
 	return 0;
 }
