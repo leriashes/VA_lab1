@@ -96,6 +96,15 @@ int main()
 		for (int j = 0; j < k; j++)
 		{
 			cout << matrix[i][j] << " ";
+
+			if (i == j)
+			{
+				matrix[i].push_back(1);
+			}
+			else
+			{
+				matrix[i].push_back(0);
+			}
 		}
 
 		cout << endl;
@@ -146,7 +155,7 @@ int main()
 		}
 	}
 
-	cout << "Матрица" << endl;
+	/*cout << "Матрица" << endl;
 	for (int i = 0; i < k; i++)
 	{
 		for (int j = 0; j < k; j++)
@@ -178,7 +187,7 @@ int main()
 	{
 		cout << matrix[i][k] << " " << endl;
 	}
-	cout << endl;
+	cout << endl;*/
 
 	//вычисление определителя
 	double det = pow(-1, p);
@@ -221,7 +230,7 @@ int main()
 	}
 	cout << endl;
 
-	for (int i = 0; i < k; i++)
+	/*for (int i = 0; i < k; i++)
 	{
 		r[i] = matrix[i][k];
 
@@ -236,7 +245,7 @@ int main()
 	{
 		cout << r[i] << " " << endl;
 	}
-	cout << endl;
+	cout << endl;*/
 
 	for (int i = 0; i < k; i++)
 	{
@@ -248,7 +257,7 @@ int main()
 		}
 	}
 
-	cout << "\nНевязки 2" << endl;
+	cout << "\nНевязки" << endl;
 	for (int i = 0; i < k; i++)
 	{
 		cout << r[i] << " " << endl;
@@ -256,17 +265,17 @@ int main()
 	cout << endl;
 
 	//обратная матрица
-	for (int t = 0; t < k; t++)
+	for (int t = k + 1; t < 2 * k + 1; t++)
 	{
-		vector <double> e;
+		/*vector <double> e;
 		e.resize(k, 0);
-		e[t] = 1;
+		e[t] = 1;*/
 
-		for (int i = t + 1; i < k; i++)
+		for (int i = 0; i < k; i++)
 		{
 			for (int j = 0; j < i; j++)
 			{
-				e[i] -= matrix[i][j] * e[j];
+				matrix[i][t] -= matrix[i][j] * matrix[j][t];
 			}
 		}
 
@@ -278,10 +287,10 @@ int main()
 
 			for (int j = k - 1; j > i; j--)
 			{
-				sum += matrix[i][j] * matrix_reversed[j][t];
+				sum += matrix[i][j] * matrix_reversed[j][t - k - 1];
 			}
-			a = (e[i] - sum) / matrix[i][i];
-			matrix_reversed[i][t] = (e[i] - sum) / matrix[i][i];
+			a = (matrix[i][t] - sum) / matrix[i][i];
+			matrix_reversed[i][t - k - 1] = (matrix[i][t] - sum) / matrix[i][i];
 			
 		}
 	}
