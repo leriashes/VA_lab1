@@ -5,118 +5,202 @@
 #include <vector>
 using namespace std;
 
-int main()
+//чтение файла
+bool readFile(vector <vector <double> >& matrix)
 {
-    setlocale(LC_ALL, "Rus");
+	int str_start = 0, str_end = 1, str_num = -1;
+	double number;
+	bool result = false, end = false;
+	string str;
 
 	//открытие файла с исходными данными
-	ifstream f("input.dat");
+	ifstream f("input.txt");
 
 	//файл для чтения не открылся
 	if (!f)
 	{
-		cout << " Не удалось открыть файл 'input.dat'" << endl;
-		return -1;
+		cout << " Не удалось открыть файл 'input.txt'" << endl;
+		result = true;
 	}
 
-	int k = -1, str_start = 0, str_end = 1, p = 0;
-	double number;
-	string str;
-	bool end = false;
-
-	vector <vector <double> > matrix;
-	vector <vector <double> > matrix_copy;
-	vector <vector <double> > matrix_reversed;
-	vector <double> x, r;
-
-	//заполнение матрицы системы уравнений
-	while (str_start != str_end && !end)
+	if (!result)
 	{
-		str_start = f.tellg();
-		getline(f, str);
-		str_end = f.tellg();
-		str_end -= 2;
-		f.seekg(str_start);
-
-		if (str_start != str_end)
+		//заполнение матрицы системы уравнений
+		while (str_start != str_end && !end)
 		{
-			matrix.push_back(vector <double>());
-			k++;
+			str_start = f.tellg();
+			getline(f, str);
+			str_end = f.tellg();
+			str_end -= 2;
+			f.seekg(str_start);
+
+			if (str_start != str_end)
+			{
+				matrix.push_back(vector <double>());
+				str_num++;
+			}
+
+			while (f.tellg() < str_end)
+			{
+				f >> number;
+				matrix[str_num].push_back(number);
+			}
+
+			getline(f, str);
+
+			if (str_num > matrix[0].size()) {
+				end = true;
+			}
 		}
 
-		while (f.tellg() < str_end)
+		if (!end)
 		{
-			f >> number;
-			matrix[k].push_back(number);
-		}
+			str_num = 0;
 
-		getline(f, str);
+			//заполнение столбца свободных членов
+			while (!f.eof())
+			{
+				f >> number;
+				matrix[str_num++].push_back(number);
+			}
 
-		if (k > matrix[0].size()) {
-			end = true;
-		}
-	}
+			//проверка числа строк и столбцов
+			for (int i = 1; i < str_num && !end; i++)
+			{
+				if (matrix[0].size() != matrix[i].size())
+					end = true;
+			}
 
-	if (!end)
-	{
-		k = 0;
-
-		//заполнение столбца свободных членов
-		while (!f.eof())
-		{
-			f >> number;
-			matrix[k++].push_back(number);
-		}
-
-		//проверка числа строк и столбцов
-		for (int i = 1; i < k && !end; i++)
-		{
-			if (matrix[0].size() != matrix[i].size())
+			if (str_num + 1 != matrix[0].size())
 				end = true;
 		}
 
-		if (k + 1 != matrix[0].size())
-			end = true;
+		f.close();
+
+		if (end)
+		{
+			cout << "Неверный формат данных!" << endl;
+			result = true;
+		}
+
+		int k = matrix.size();
+
+		for (int i = 0; i < k; i++)
+		{
+			for (int j = 0; j < k; j++)
+			{
+				if (i == j)
+				{
+					matrix[i].push_back(1);
+				}
+				else
+				{
+					matrix[i].push_back(0);
+				}
+			}
+		}
 	}
 
-	f.close();
+	return result;
+}
 
-	if (end) 
-	{
-		cout << "Неверный формат данных!" << endl;
-		return -1;
-	}
+//вывод матрицы
+void printMatrix(vector <vector <double> > matrix)
+{
+	int k = matrix.size();
 
-	matrix_copy = matrix;
-	matrix_reversed = matrix;
-
-	cout << "Матрица A (матрица системы)" << endl;
 	for (int i = 0; i < k; i++)
 	{
 		for (int j = 0; j < k; j++)
 		{
 			cout << matrix[i][j] << " ";
-
-			if (i == j)
-			{
-				matrix[i].push_back(1);
-			}
-			else
-			{
-				matrix[i].push_back(0);
-			}
 		}
 
 		cout << endl;
 	}
 
-	cout << "\nВектор B" << endl;
+	return;
+}
+
+//вывод матрицы в файл
+void fprintMatrix(vector <vector <double> > matrix, ofstream& file)
+{
+	int k = matrix.size();
+
 	for (int i = 0; i < k; i++)
 	{
-		cout << matrix[i][k] << " " << endl;
+		for (int j = 0; j < k; j++)
+		{
+			file << matrix[i][j] << " ";
+		}
+
+		file << endl;
 	}
+
+	return;
+}
+
+//вывод вектора
+void printVector(vector <double> vec)
+{
+	int k = vec.size();
+
+	for (int i = 0; i < k; i++)
+	{
+		cout << vec[i] << " " << endl;
+	}
+
 	cout << endl;
 
+	return;
+}
+
+//вывод вектора
+void printVector(vector <vector <double> > matrix, int column)
+{
+	for (int i = 0; i < column; i++)
+	{
+		cout << matrix[i][column] << " " << endl;
+	}
+
+	cout << endl;
+
+	return;
+}
+
+//вывод вектора в файл
+void fprintVector(vector <double> vec, ofstream& file)
+{
+	int k = vec.size();
+
+	for (int i = 0; i < k; i++)
+	{
+		file << vec[i] << " " << endl;
+	}
+
+	file << endl;
+
+	return;
+}
+
+//вывод вектора в файл
+void fprintVector(vector <vector <double> > matrix, int column, ofstream& file)
+{
+	for (int i = 0; i < column; i++)
+	{
+		file << matrix[i][column] << " " << endl;
+	}
+
+	file << endl;
+
+	return;
+}
+
+
+//приведение матрицы к треугольному виду с использованием выбора главного элемента
+int matrixToTriangle(vector <vector <double> >& matrix)
+{
+	int k = matrix.size(), p = 0;
 
 	//приведение матрицы к треугольному виду с использованием выбора главного элемента
 	for (int t = 0; t < k - 1; t++)
@@ -137,102 +221,77 @@ int main()
 		//перестановка строк
 		if (t != num)
 		{
-			matrix[t].swap(matrix[num]); 
+			matrix[t].swap(matrix[num]);
 			p++;
 		}
 
 		//прямой ход
 		for (int i = t + 1; i < k; i++)
 		{
-			double coef = matrix[i][t] / matrix[t][t];
+			double coef = 0;
 
-			for (int j = t; j <= k; j++)
+			if (matrix[t][t] != 0)
+			{
+				coef = matrix[i][t] / matrix[t][t];
+			}
+
+			for (int j = t; j <= k + k; j++)
 			{
 				matrix[i][j] = matrix[i][j] - matrix[t][j] * coef;
 			}
-
-			matrix[i][t] = coef;
 		}
 	}
 
-	/*cout << "Матрица" << endl;
-	for (int i = 0; i < k; i++)
-	{
-		for (int j = 0; j < k; j++)
-		{
-			cout << matrix[i][j] << " ";
-		}
+	return p;
+}
 
-		cout << endl;
-	}
-
-	cout << "\nМатрица A (матрица системы)" << endl;
-	for (int i = 0; i < k; i++)
-	{
-		for (int j = 0; j < i; j++)
-		{
-			cout << "0 ";
-		}
-
-		for (int j = i; j < k; j++)
-		{
-			cout << matrix[i][j] << " ";
-		}
-
-		cout << endl;
-	}
-
-	cout << "\nВектор B" << endl;
-	for (int i = 0; i < k; i++)
-	{
-		cout << matrix[i][k] << " " << endl;
-	}
-	cout << endl;*/
-
-	//вычисление определителя
-	double det = pow(-1, p);
-
-	for (int i = 0; i < k; i++)
-	{
-		det *= matrix[i][i];
-	}
-
-	if (det == 0)
-	{
-		cout << "Матрица вырождена! det A = 0" << endl;
-		return 0;
-	}
-	else
-	{
-		cout << "det A = " << det << endl;
-	}
+//обратный ход
+vector <double> backSub(vector <vector <double> > triangle_matrix, int num)
+{
+	vector <double> x;
+	int k = triangle_matrix.size();
 
 	x.resize(k);
-	r.resize(k);
 
-	//обратный ход
-	for (int i = k - 1; i >= 0; i--) 
+	for (int i = k - 1; i >= 0; i--)
 	{
 		double sum = 0;
 
 		for (int j = k - 1; j > i; j--)
 		{
-			sum += matrix[i][j] * x[j];
+			sum += triangle_matrix[i][j] * x[j];
 		}
 
-		x[i] = (matrix[i][k] - sum) / matrix[i][i];
+		x[i] = (triangle_matrix[i][num] - sum) / triangle_matrix[i][i];
 	}
 
-	cout << "\nВектор X" << endl;
+	return x;
+}
+
+
+//вычисление определителя
+double determinant(vector <vector <double> > triangle_matrix, int num_change)
+{
+	double det = pow(-1, num_change);
+	int k = triangle_matrix.size();
+
 	for (int i = 0; i < k; i++)
 	{
-		cout << x[i] << " " << endl;
+		det *= triangle_matrix[i][i];
 	}
-	cout << endl;
 
-	/*for (int i = 0; i < k; i++)
+	return det;
+}
+
+//определение невязок
+vector <double> residual(vector <vector <double> > matrix, vector <double> x)
+{
+	vector <double> r;
+	int k = matrix.size();
+
+	for (int i = 0; i < k; i++)
 	{
-		r[i] = matrix[i][k];
+		r.push_back(matrix[i][k]);
 
 		for (int j = 0; j < k; j++)
 		{
@@ -240,72 +299,134 @@ int main()
 		}
 	}
 
-	cout << "\nНевязки 1" << endl;
-	for (int i = 0; i < k; i++)
-	{
-		cout << r[i] << " " << endl;
-	}
-	cout << endl;*/
+	return r;
+}
 
-	for (int i = 0; i < k; i++)
-	{
-		r[i] = matrix_copy[i][k];
+//поиск обратной матрицы
+vector <vector <double> > inverseMatrix(vector <vector <double> > matrix)
+{
+	vector <vector <double> > inverse_matrix;
 
-		for (int j = 0; j < k; j++)
-		{
-			r[i] -= matrix_copy[i][j] * x[j];
-		}
-	}
+	int k = matrix.size();
 
-	cout << "\nНевязки" << endl;
-	for (int i = 0; i < k; i++)
-	{
-		cout << r[i] << " " << endl;
-	}
-	cout << endl;
+	inverse_matrix.resize(k);
 
-	//обратная матрица
-	for (int t = k + 1; t < 2 * k + 1; t++)
+	for (int t = 0; t < k; t++)
 	{
-		/*vector <double> e;
-		e.resize(k, 0);
-		e[t] = 1;*/
+		vector <double> e;
+		e = backSub(matrix, t + k + 1);
 
 		for (int i = 0; i < k; i++)
 		{
-			for (int j = 0; j < i; j++)
-			{
-				matrix[i][t] -= matrix[i][j] * matrix[j][t];
-			}
-		}
-
-		int a, b;
-		//обратный ход
-		for (int i = k - 1; i >= 0; i--)
-		{
-			double sum = 0;
-
-			for (int j = k - 1; j > i; j--)
-			{
-				sum += matrix[i][j] * matrix_reversed[j][t - k - 1];
-			}
-			a = (matrix[i][t] - sum) / matrix[i][i];
-			matrix_reversed[i][t - k - 1] = (matrix[i][t] - sum) / matrix[i][i];
-			
+			inverse_matrix[i].push_back(e[i]);
 		}
 	}
 
+	return inverse_matrix;
+}
 
-	cout << "\nОбратная матрица" << endl;
-	for (int i = 0; i < k; i++)
+int main()
+{
+	setlocale(LC_ALL, "Rus");
+
+	int k, p;
+
+	vector <vector <double> > matrix;
+	vector <vector <double> > triangle_matrix;
+	vector <vector <double> > inverse_matrix;
+	vector <double> x, r;
+
+	if (readFile(matrix))
 	{
-		for (int j = 0; j < k; j++)
-		{
-			cout << matrix_reversed[i][j] << " ";
-		}
-
-		cout << endl;
+		return -1;
 	}
+
+	ofstream result("result.txt");
+	if (!result)
+	{
+		cout << "Не удалось открыть файл для записи результата!" << endl;
+		return -1;
+	}
+
+	k = matrix.size();
+	triangle_matrix = matrix;
+	inverse_matrix = matrix;
+
+
+	//вывод матрицы A
+	cout << "Матрица A" << endl;
+	printMatrix(matrix);
+
+	result << "Матрица A" << endl;
+	fprintMatrix(matrix, result);
+
+	//вывод вектора B
+	cout << "\nВектор B" << endl;
+	printVector(matrix, k);
+
+	result << "\nВектор B" << endl;
+	fprintVector(matrix, k, result);
+
+	p = matrixToTriangle(triangle_matrix); //приведение матрицы к треугольному виды
+
+	//вычисление определителя
+	double det = determinant(triangle_matrix, p);
+
+	//вывод определителя
+	if (det == 0)
+	{
+		cout << "Матрица вырожденная! det A = 0" << endl;
+		result << "Матрица вырожденная! det A = 0" << endl;
+	}
+	else
+	{
+		//вывод треугольной матрицы
+		cout << "Треугольная матрица" << endl;
+		printMatrix(triangle_matrix);
+
+		result << "Треугольная матрица" << endl;
+		fprintMatrix(triangle_matrix, result);
+
+		//вывод столбца свободных членов
+		cout << "\nСтолбец свободных членов" << endl;
+		printVector(triangle_matrix, k);
+
+		result << "\nСтолбец свободных членов" << endl;
+		fprintVector(triangle_matrix, k, result);
+
+		cout << "det A = " << det << endl;
+		result << "det A = " << det << endl;
+
+		x = backSub(triangle_matrix, k); //обратный ход - поиск x
+
+		//вывод вектора X
+		cout << "\nВектор X" << endl;
+		printVector(x);
+
+		result << "\nВектор X" << endl;
+		fprintVector(x, result);
+
+		r = residual(matrix, x); //определение невязок
+
+		//вывод невязок
+		cout << "\nНевязки " << endl;
+		printVector(r);
+
+		result << "Невязки " << endl;
+		fprintVector(r, result);
+
+		//обратная матрица
+		inverse_matrix = inverseMatrix(triangle_matrix);
+
+		//вывод обратной матрицы
+		cout << "\nОбратная матрица" << endl;
+		printMatrix(inverse_matrix);
+
+		result << "Обратная матрица" << endl;
+		fprintMatrix(inverse_matrix, result);
+	}
+
+	result.close();
 
 	return 0;
 }
